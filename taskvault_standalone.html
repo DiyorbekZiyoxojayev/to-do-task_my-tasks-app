@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>TaskVault — Vazifalar</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#c8ff00"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="TaskVault"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--card:#16161f;--border:#2a2a3a;
+  --accent:#c8ff00;--accent2:#ff6b35;--accent3:#7c3aed;
+  --text:#e8e8f0;--muted:#6b6b80;
+  --high:#ff4757;--med:#ffa502;--low:#2ed573;--coin:#f9c74f;
+}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
+.blob{position:fixed;border-radius:50%;filter:blur(80px);opacity:.11;pointer-events:none;z-index:0}
+.b1{width:480px;height:480px;background:var(--accent3);top:-80px;right:-80px;animation:d1 13s ease-in-out infinite}
+.b2{width:380px;height:380px;background:var(--accent2);bottom:-60px;left:-60px;animation:d2 16s ease-in-out infinite}
+.b3{width:280px;height:280px;background:var(--accent);top:45%;left:25%;animation:d3 11s ease-in-out infinite}
+@keyframes d1{0%,100%{transform:translate(0,0)}50%{transform:translate(-25px,35px)}}
+@keyframes d2{0%,100%{transform:translate(0,0)}50%{transform:translate(35px,-18px)}}
+@keyframes d3{0%,100%{transform:translate(0,0)}50%{transform:translate(-15px,25px)}}
+.wrap{position:relative;z-index:1;min-height:100vh}
+
+/* AUTH */
+.auth{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1.5rem}
+.abox{background:rgba(22,22,31,.92);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:24px;padding:2.8rem 2.4rem;width:100%;max-width:400px;box-shadow:0 0 60px rgba(124,58,237,.12)}
+.logo{font-size:2.5rem;font-weight:800;letter-spacing:-2px;margin-bottom:.2rem}
+.logo span{color:var(--accent)}
+.sub{color:var(--muted);font-family:'DM Mono',monospace;font-size:.75rem;margin-bottom:2.2rem}
+.tabs{display:flex;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:1.8rem}
+.tab{flex:1;padding:.65rem;text-align:center;cursor:pointer;border-radius:8px;font-size:.88rem;font-weight:600;transition:all .3s;color:var(--muted)}
+.tab.on{background:var(--card);color:var(--accent)}
+.f{margin-bottom:1.1rem}
+.f label{display:block;font-size:.7rem;color:var(--muted);margin-bottom:.45rem;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px}
+.f input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.8rem 1rem;border-radius:11px;font-family:'Syne',sans-serif;font-size:.92rem;outline:none;transition:border-color .2s}
+.f input:focus{border-color:var(--accent)}
+.err{background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.3);color:#ff6b81;padding:.75rem 1rem;border-radius:10px;font-size:.83rem;margin-bottom:1rem;text-align:center}
+.hint{background:rgba(124,58,237,.1);color:#a78bfa;padding:.7rem 1rem;border-radius:10px;font-size:.78rem;margin-bottom:1rem;text-align:center;font-family:'DM Mono',monospace}
+.btn{width:100%;padding:.9rem;background:var(--accent);color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:.98rem;border:none;border-radius:12px;cursor:pointer;transition:all .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(200,255,0,.28)}
+
+/* MAIN */
+.main{max-width:880px;margin:0 auto;padding:2rem 1.4rem 5rem}
+.hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2.2rem;gap:.8rem;flex-wrap:wrap}
+.hdr-l h1{font-size:1.8rem;font-weight:800;letter-spacing:-1.5px}
+.hdr-l h1 span{color:var(--accent)}
+.hdr-l p{color:var(--muted);font-family:'DM Mono',monospace;font-size:.7rem;margin-top:.25rem}
+.hdr-r{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.cbadge{background:rgba(249,199,79,.1);border:1px solid rgba(249,199,79,.3);padding:.5rem 1rem;border-radius:50px;font-weight:700;font-size:.92rem;color:var(--coin);display:flex;align-items:center;gap:.4rem}
+.cbadge.pop{animation:cpop .35s ease}
+@keyframes cpop{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+.sbadge{background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.3);padding:.5rem .9rem;border-radius:50px;font-size:.8rem;color:var(--accent2);font-weight:600}
+.lbbtn{background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.3);color:#a78bfa;padding:.5rem .9rem;border-radius:50px;cursor:pointer;font-family:'Syne',sans-serif;font-size:.78rem;font-weight:600;transition:all .2s}
+.lbbtn:hover{background:rgba(124,58,237,.2)}
+.outbtn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:.5rem .9rem;border-radius:50px;cursor:pointer;font-family:'Syne',sans-serif;font-size:.76rem;transition:all .2s}
+.outbtn:hover{border-color:var(--high);color:var(--high)}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.8rem}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1rem;text-align:center}
+.sv{font-size:1.65rem;font-weight:800;margin-bottom:.2rem}
+.sv.g{color:var(--coin)}.sv.gr{color:var(--low)}.sv.o{color:var(--accent2)}
+.sl{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+
+/* LB */
+.lb{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:1.3rem;margin-bottom:1.5rem}
+.lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:1rem}
+.lbr{display:flex;align-items:center;gap:.9rem;padding:.55rem 0;border-bottom:1px solid var(--border)}
+.lbr:last-child{border-bottom:none}
+.lbrk{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);width:24px;text-align:center;flex-shrink:0}
+.lbn{flex:1;font-weight:600;font-size:.86rem}
+.lbme{color:var(--accent);font-size:.68rem;font-family:'DM Mono',monospace}
+.lbc{font-family:'DM Mono',monospace;font-size:.8rem;color:var(--coin)}
+
+/* ADD */
+.addf{background:rgba(22,22,31,.88);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:18px;padding:1.5rem;margin-bottom:1.4rem}
+.sl2{font-size:.68rem;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:1.1rem}
+.frow{display:grid;grid-template-columns:1fr auto auto;gap:.65rem;align-items:end}
+@media(max-width:560px){.frow{grid-template-columns:1fr 1fr}.ftitle{grid-column:1/-1}}
+.ff{display:flex;flex-direction:column;gap:.35rem}
+.ff label{font-size:.67rem;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.8px}
+.ff input,.ff select{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.65rem .85rem;border-radius:9px;font-family:'Syne',sans-serif;font-size:.86rem;outline:none;transition:border-color .2s}
+.ff input:focus,.ff select:focus{border-color:var(--accent)}
+.ff select option{background:var(--card)}
+.addbtn{background:var(--accent);color:#000;border:none;padding:.65rem 1.3rem;border-radius:9px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:800;font-size:.88rem;white-space:nowrap;transition:all .2s;align-self:end}
+.addbtn:hover{box-shadow:0 0 18px rgba(200,255,0,.35);transform:translateY(-1px)}
+.costs{display:flex;gap:1.2rem;margin-top:.8rem;flex-wrap:wrap}
+.ci{font-family:'DM Mono',monospace;font-size:.66rem;color:var(--muted)}
+.ci b{color:var(--coin)}
+
+/* CONTROLS */
+.ctrl{margin-bottom:1.1rem;display:flex;flex-direction:column;gap:.7rem}
+.sw{position:relative}
+.sw input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:.7rem 1rem .7rem 2.6rem;border-radius:13px;font-family:'Syne',sans-serif;font-size:.86rem;outline:none;transition:border-color .2s}
+.sw input:focus{border-color:var(--accent3)}
+.si{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.9rem}
+.fbar{display:flex;gap:.45rem;flex-wrap:wrap}
+.fbtn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:.42rem .9rem;border-radius:50px;cursor:pointer;font-family:'Syne',sans-serif;font-size:.78rem;font-weight:600;transition:all .2s}
+.fbtn.on,.fbtn:hover{border-color:var(--accent);color:var(--accent);background:rgba(200,255,0,.05)}
+
+/* TASKS */
+.tlist{display:flex;flex-direction:column;gap:.7rem}
+.empty{text-align:center;padding:3.5rem 2rem;color:var(--muted)}
+.empty .big{font-size:2.8rem;display:block;margin-bottom:.9rem}
+.empty p{font-family:'DM Mono',monospace;font-size:.8rem}
+.tc{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:1rem 1.2rem;display:flex;align-items:center;gap:.9rem;transition:all .22s;position:relative;overflow:hidden;animation:ci .28s ease}
+@keyframes ci{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.tc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+.tc.high::before{background:var(--high)}
+.tc.medium::before{background:var(--med)}
+.tc.low::before{background:var(--low)}
+.tc:hover{border-color:rgba(200,255,0,.13);transform:translateY(-1px)}
+.tc.done{opacity:.48}
+.tc.done .ttitle{text-decoration:line-through;color:var(--muted)}
+.chk{width:21px;height:21px;border:2px solid var(--border);border-radius:6px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:.75rem;font-weight:800}
+.chk:hover{border-color:var(--accent)}
+.chk.on{background:var(--accent);border-color:var(--accent);color:#000}
+.ti{flex:1;min-width:0}
+.ttitle{font-weight:700;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.28rem}
+.tmeta{display:flex;gap:.65rem;align-items:center;flex-wrap:wrap}
+.tdl{font-family:'DM Mono',monospace;font-size:.68rem;color:var(--muted)}
+.tdl.ov{color:var(--high)!important}
+.tdl.sn{color:var(--med)!important}
+.ptag{font-size:.6rem;font-weight:700;padding:.16rem .5rem;border-radius:50px;text-transform:uppercase;letter-spacing:.7px}
+.ptag.high{background:rgba(255,71,87,.14);color:var(--high)}
+.ptag.medium{background:rgba(255,165,2,.14);color:var(--med)}
+.ptag.low{background:rgba(46,213,115,.14);color:var(--low)}
+.delbtn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:7px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.85rem;transition:all .2s;flex-shrink:0}
+.delbtn:hover{border-color:var(--high);color:var(--high);background:rgba(255,71,87,.1)}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.4rem;right:.9rem;z-index:9999;display:flex;flex-direction:column;gap:.45rem;max-width:290px;pointer-events:none}
+.ti2{background:var(--card);border:1px solid var(--border);padding:.85rem 1rem;border-radius:13px;font-size:.83rem;line-height:1.4;animation:tin .28s ease;box-shadow:0 8px 28px rgba(0,0,0,.45)}
+@keyframes tin{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+.ti2.rw{border-color:rgba(200,255,0,.38);color:var(--accent)}
+.ti2.pn{border-color:rgba(255,71,87,.38);color:var(--high)}
+.ti2.in{border-color:rgba(124,58,237,.38);color:#a78bfa}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="blob b1"></div>
+<div class="blob b2"></div>
+<div class="blob b3"></div>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script type="text/babel">
+const {useState,useCallback,useRef}=React;
+
+// ── localStorage helpers ──────────────────────────────────────────────────
+const S={
+  users:()=>JSON.parse(localStorage.getItem("tv2_users")||"{}"),
+  saveUsers:u=>localStorage.setItem("tv2_users",JSON.stringify(u)),
+  tasks:un=>JSON.parse(localStorage.getItem("tv2_tasks_"+un)||"[]"),
+  saveTasks:(un,t)=>localStorage.setItem("tv2_tasks_"+un,JSON.stringify(t)),
+  session:()=>JSON.parse(localStorage.getItem("tv2_sess")||"null"),
+  saveSess:u=>localStorage.setItem("tv2_sess",JSON.stringify(u)),
+  clearSess:()=>localStorage.removeItem("tv2_sess"),
+};
+
+// ── Toast ────────────────────────────────────────────────────────────────────
+function useToast(){
+  const [list,setList]=useState([]);
+  const show=useCallback((msg,type="in")=>{
+    const id=Date.now()+Math.random();
+    setList(p=>[...p,{id,msg,type}]);
+    setTimeout(()=>setList(p=>p.filter(t=>t.id!==id)),3000);
+  },[]);
+  return{list,show};
+}
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+function Auth({onLogin}){
+  const [tab,setTab]=useState("login");
+  const [un,setUn]=useState("");
+  const [pw,setPw]=useState("");
+  const [err,setErr]=useState("");
+
+  const go=()=>{
+    setErr("");
+    if(!un.trim()||!pw.trim()){setErr("Barcha maydonlarni to'ldiring!");return;}
+    if(un.length<3){setErr("Username kamida 3 ta harf!");return;}
+    if(pw.length<4){setErr("Parol kamida 4 ta belgi!");return;}
+    const users=S.users();
+    if(tab==="register"){
+      if(users[un]){setErr("Bu username band! Boshqa tanlang.");return;}
+      const u={username:un,password:pw,coins:100,streak:0,total:0};
+      users[un]=u; S.saveUsers(users); S.saveSess(u);
+      onLogin(u,`Xush kelibsiz, ${un}! 🎉 100 tanga berildi!`);
+    } else {
+      const u=users[un];
+      if(!u||u.password!==pw){setErr("Username yoki parol noto'g'ri!");return;}
+      S.saveSess(u); onLogin(u,`Qaytib keldingiz, ${un}! 🎯`);
+    }
+  };
+
+  return <div className="auth">
+    <div className="abox">
+      <div className="logo">Task<span>Vault</span></div>
+      <div className="sub">// vazifalar.boshqaruvi.tizimi</div>
+      <div className="tabs">
+        <div className={`tab ${tab==="login"?"on":""}`} onClick={()=>{setTab("login");setErr("")}}>Kirish</div>
+        <div className={`tab ${tab==="register"?"on":""}`} onClick={()=>{setTab("register");setErr("")}}>Ro'yxatdan o'tish</div>
+      </div>
+      {err&&<div className="err">⚠ {err}</div>}
+      {tab==="register"&&<div className="hint">🪙 Ro'yxatdan o'tsangiz <b>100 tanga</b> beriladi!</div>}
+      <div className="f">
+        <label>Username</label>
+        <input placeholder="masalan: diyorbek99" value={un}
+          onChange={e=>setUn(e.target.value.toLowerCase().replace(/\s/g,""))}
+          onKeyDown={e=>e.key==="Enter"&&go()} autoComplete="username"/>
+      </div>
+      <div className="f">
+        <label>Parol</label>
+        <input type="password" placeholder="••••••••" value={pw}
+          onChange={e=>setPw(e.target.value)}
+          onKeyDown={e=>e.key==="Enter"&&go()} autoComplete="current-password"/>
+      </div>
+      <button className="btn" onClick={go}>{tab==="login"?"Kirish →":"Ro'yxatdan o'tish →"}</button>
+    </div>
+  </div>;
+}
+
+// ── Main ─────────────────────────────────────────────────────────────────────
+function Main({initUser,onOut}){
+  const [user,setUser]=useState(initUser);
+  const [tasks,setTasks]=useState(()=>S.tasks(initUser.username));
+  const [filter,setFilter]=useState("all");
+  const [search,setSearch]=useState("");
+  const [showLB,setShowLB]=useState(false);
+  const [nt,setNt]=useState("");
+  const [nd,setNd]=useState("");
+  const [np,setNp]=useState("medium");
+  const cref=useRef(null);
+  const {list,show}=useToast();
+  const today=new Date().toISOString().split("T")[0];
+
+  const upUser=u=>{const us=S.users();us[u.username]=u;S.saveUsers(us);S.saveSess(u);setUser(u);};
+  const upTasks=t=>{S.saveTasks(user.username,t);setTasks(t);};
+  const pop=()=>{if(cref.current){cref.current.classList.remove("pop");void cref.current.offsetWidth;cref.current.classList.add("pop");}};
+
+  const add=()=>{
+    if(!nt.trim()){show("Vazifa nomini kiriting!","pn");return;}
+    if(user.coins<5){show("Tangalar yetarli emas! (kerak: 5🪙)","pn");return;}
+    const task={id:Date.now(),title:nt.trim(),deadline:nd||null,priority:np,completed:false,createdAt:Date.now()};
+    upTasks([task,...tasks]);
+    upUser({...user,coins:user.coins-5});
+    pop(); show("Vazifa qo'shildi! -5🪙","pn");
+    setNt("");setNd("");setNp("medium");
+  };
+
+  const toggle=task=>{
+    const done=task.completed;
+    let dc=0,msg="",ns=user.streak;
+    if(!done){
+      if(task.deadline&&today>task.deadline){dc=-10;msg="⏰ Deadline o'tgan! -10🪙";ns=0;}
+      else{dc=task.deadline?20:10;msg=task.deadline?"⚡ Vaqtida! +20🪙":"✅ Bajarildi! +10🪙";ns=user.streak+1;}
+    } else {dc=-5;msg="🔄 Qayta ochildi -5🪙";ns=0;}
+    upTasks(tasks.map(t=>t.id===task.id?{...t,completed:!done}:t));
+    upUser({...user,coins:Math.max(0,user.coins+dc),streak:ns,total:user.total+(!done?1:-1)});
+    pop(); show(msg,dc>0?"rw":"pn");
+  };
+
+  const del=task=>{
+    upTasks(tasks.filter(t=>t.id!==task.id));
+    if(!task.completed){upUser({...user,coins:Math.max(0,user.coins-3)});pop();show("O'chirildi -3🪙","pn");}
+    else show("O'chirildi","in");
+  };
+
+  const dlInfo=(dl,done)=>{
+    if(!dl||done)return{cls:"",txt:""};
+    const d=(new Date(dl)-new Date(today))/86400000;
+    if(d<0)return{cls:"ov",txt:"⚠ Muddati o'tdi!"};
+    if(d===0)return{cls:"sn",txt:"⏰ Bugun!"};
+    if(d<=2)return{cls:"sn",txt:`⏰ ${Math.ceil(d)} kun`};
+    return{cls:"",txt:`📅 ${dl}`};
+  };
+
+  const lb=Object.values(S.users()).sort((a,b)=>b.coins-a.coins).slice(0,10);
+  const done=tasks.filter(t=>t.completed).length;
+  const filtered=tasks.filter(t=>{
+    const fm=filter==="all"||(filter==="active"&&!t.completed)||(filter==="done"&&t.completed)||(filter==="overdue"&&!t.completed&&t.deadline&&t.deadline<today);
+    return fm&&t.title.toLowerCase().includes(search.toLowerCase());
+  });
+
+  return <div className="wrap">
+    {/* Toast */}
+    <div className="toast">{list.map(t=><div key={t.id} className={`ti2 ${t.type}`}>{t.msg}</div>)}</div>
+
+    <div className="main">
+      {/* Header */}
+      <div className="hdr">
+        <div className="hdr-l">
+          <h1>Task<span>Vault</span></h1>
+          <p>// {user.username} hisob paneli</p>
+        </div>
+        <div className="hdr-r">
+          <div ref={cref} className="cbadge">🪙 {user.coins}</div>
+          {user.streak>0&&<div className="sbadge">🔥 {user.streak} streak</div>}
+          <button className="lbbtn" onClick={()=>setShowLB(p=>!p)}>🏆 Reyting</button>
+          <button className="outbtn" onClick={onOut}>Chiqish</button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="stats">
+        <div className="sc"><div className="sv g">{user.coins}</div><div className="sl">🪙 Tangalar</div></div>
+        <div className="sc"><div className="sv gr">{done}</div><div className="sl">✅ Bajarilgan</div></div>
+        <div className="sc"><div className="sv o">{tasks.length-done}</div><div className="sl">⏳ Qolgan</div></div>
+      </div>
+
+      {/* Leaderboard */}
+      {showLB&&<div className="lb">
+        <div className="lbl">🏆 eng boy foydalanuvchilar</div>
+        {lb.length===0&&<p style={{color:"var(--muted)",fontFamily:"'DM Mono',monospace",fontSize:".78rem",textAlign:"center",padding:".8rem"}}>Hali foydalanuvchilar yo'q</p>}
+        {lb.map((u,i)=><div key={u.username} className="lbr">
+          <div className="lbrk">{i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</div>
+          <div className="lbn">{u.username}{u.username===user.username&&<span className="lbme"> ← siz</span>}</div>
+          <div className="lbc">🪙 {u.coins}</div>
+        </div>)}
+      </div>}
+
+      {/* Add form */}
+      <div className="addf">
+        <div className="sl2">// yangi vazifa qo'shish</div>
+        <div className="frow">
+          <div className="ff ftitle">
+            <label>Vazifa nomi</label>
+            <input placeholder="Nima qilish kerak?" value={nt}
+              onChange={e=>setNt(e.target.value)} onKeyDown={e=>e.key==="Enter"&&add()}/>
+          </div>
+          <div className="ff">
+            <label>Deadline</label>
+            <input type="date" value={nd} min={today} onChange={e=>setNd(e.target.value)}/>
+          </div>
+          <div className="ff">
+            <label>Muhimlik</label>
+            <select value={np} onChange={e=>setNp(e.target.value)}>
+              <option value="high">🔴 Yuqori</option>
+              <option value="medium">🟡 O'rta</option>
+              <option value="low">🟢 Past</option>
+            </select>
+          </div>
+        </div>
+        <div style={{marginTop:".85rem",display:"flex",gap:"1rem",alignItems:"center",flexWrap:"wrap"}}>
+          <button className="addbtn" onClick={add}>+ Qo'shish</button>
+          <div className="costs">
+            <span className="ci">Qo'shish: <b>-5🪙</b></span>
+            <span className="ci">Vaqtida: <b>+20🪙</b></span>
+            <span className="ci">Kechikish: <b>-10🪙</b></span>
+            <span className="ci">O'chirish: <b>-3🪙</b></span>
+          </div>
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div className="ctrl">
+        <div className="sw">
+          <span className="si">🔍</span>
+          <input placeholder="Vazifa qidirish..." value={search} onChange={e=>setSearch(e.target.value)}/>
+        </div>
+        <div className="fbar">
+          {[["all","Barchasi"],["active","Aktiv"],["done","Bajarilgan"],["overdue","Muddati o'tgan"]].map(([v,l])=>
+            <button key={v} className={`fbtn ${filter===v?"on":""}`} onClick={()=>setFilter(v)}>{l}</button>
+          )}
+        </div>
+      </div>
+
+      {/* Tasks */}
+      {filtered.length===0
+        ?<div className="empty"><span className="big">{search?"🔍":"📭"}</span><p>{search?"Hech narsa topilmadi":"Vazifalar yo'q. Yangi qo'shing! 🚀"}</p></div>
+        :<div className="tlist">
+          {filtered.map(task=>{
+            const dl=dlInfo(task.deadline,task.completed);
+            return <div key={task.id} className={`tc ${task.priority} ${task.completed?"done":""}`}>
+              <div className={`chk ${task.completed?"on":""}`} onClick={()=>toggle(task)}>{task.completed&&"✓"}</div>
+              <div className="ti">
+                <div className="ttitle">{task.title}</div>
+                <div className="tmeta">
+                  {task.deadline&&<span className={`tdl ${dl.cls}`}>{dl.txt||`📅 ${task.deadline}`}</span>}
+                  <span className={`ptag ${task.priority}`}>{task.priority==="high"?"Yuqori":task.priority==="medium"?"O'rta":"Past"}</span>
+                </div>
+              </div>
+              <button className="delbtn" onClick={()=>del(task)}>🗑</button>
+            </div>;
+          })}
+        </div>
+      }
+    </div>
+  </div>;
+}
+
+// ── Root ─────────────────────────────────────────────────────────────────────
+function App(){
+  const [user,setUser]=useState(()=>{
+    const s=S.session();
+    if(!s)return null;
+    // Refresh from DB
+    return S.users()[s.username]||s;
+  });
+  const {list,show}=useToast();
+
+  return <>
+    <div className="toast">{list.map(t=><div key={t.id} className={`ti2 ${t.type}`}>{t.msg}</div>)}</div>
+    {user
+      ?<Main initUser={user} onOut={()=>{S.clearSess();setUser(null);}}/>
+      :<Auth onLogin={(u,msg)=>{setUser(u);show(msg,"rw");}}/>
+    }
+  </>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+
+<!-- PWA Banner -->
+<div id="pwa-b" style="display:none;position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);z-index:9999;align-items:center;gap:.9rem;background:#16161f;border:1px solid #c8ff00;border-radius:15px;padding:.9rem 1.2rem;box-shadow:0 0 36px rgba(200,255,0,.18);max-width:310px;width:90%">
+  <div style="font-size:1.6rem">📱</div>
+  <div style="flex:1"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:#e8e8f0">TaskVault</div><div style="font-family:'DM Mono',monospace;font-size:.67rem;color:#6b6b80;margin-top:.18rem">Telefoningizga o'rnating!</div></div>
+  <button id="pwa-yes" style="background:#c8ff00;color:#000;border:none;padding:.42rem .85rem;border-radius:8px;font-family:'Syne',sans-serif;font-weight:800;cursor:pointer;font-size:.8rem">O'rnatish</button>
+  <button id="pwa-no" style="background:transparent;border:none;color:#6b6b80;cursor:pointer;font-size:1rem;padding:.2rem">✕</button>
+</div>
+<script>
+if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+let dp;const b=document.getElementById("pwa-b");
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;b.style.display="flex";});
+document.getElementById("pwa-yes").onclick=async()=>{if(!dp)return;dp.prompt();await dp.userChoice;dp=null;b.style.display="none";};
+document.getElementById("pwa-no").onclick=()=>b.style.display="none";
+window.addEventListener("appinstalled",()=>b.style.display="none");
+</script>
+</body>
+</html>
