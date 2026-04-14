@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskVault</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a14;color:#eee;font-family:system-ui,sans-serif;min-height:100vh}
+
+/* AUTH */
+.auth{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.acard{background:#13131f;border:1px solid #2a2a3a;border-radius:20px;padding:40px 32px;width:100%;max-width:380px}
+.acard h1{font-size:28px;font-weight:800;margin-bottom:4px}
+.acard h1 span{color:#9d5df0}
+.acard p{color:#666;font-size:12px;margin-bottom:28px}
+.tabs{display:flex;background:#080810;border-radius:10px;padding:4px;margin-bottom:24px}
+.tab{flex:1;padding:10px;text-align:center;cursor:pointer;border-radius:7px;font-size:14px;font-weight:600;color:#666;transition:.2s}
+.tab.on{background:#7c3aed;color:#fff}
+.lbl{display:block;font-size:11px;color:#666;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.inp{width:100%;background:#080810;border:1px solid #2a2a3a;color:#eee;padding:12px 14px;border-radius:10px;font-size:15px;outline:none;margin-bottom:14px;font-family:system-ui,sans-serif}
+.inp:focus{border-color:#7c3aed}
+.err{background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.3);color:#fb7185;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none}
+.hint{background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.2);color:#06b6d4;padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:14px;text-align:center}
+.btn{width:100%;padding:13px;background:#7c3aed;color:#fff;font-size:15px;font-weight:700;border:none;border-radius:10px;cursor:pointer;transition:.2s;font-family:system-ui,sans-serif}
+.btn:hover{background:#9d5df0}
+
+/* APP */
+.app{display:none;flex-direction:column;min-height:100vh}
+
+/* TOPBAR */
+.topbar{background:#13131f;border-bottom:1px solid #2a2a3a;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.topbar h2{font-size:18px;font-weight:800}
+.topbar h2 span{color:#9d5df0}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.coin-pill{background:rgba(226,183,20,.1);border:1px solid rgba(226,183,20,.25);color:#e2b714;padding:6px 14px;border-radius:50px;font-size:13px;font-weight:700}
+.streak-pill{background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.25);color:#fb923c;padding:6px 12px;border-radius:50px;font-size:13px;font-weight:600}
+.out-btn{background:transparent;border:1px solid #2a2a3a;color:#666;padding:6px 12px;border-radius:50px;cursor:pointer;font-size:12px;font-family:system-ui,sans-serif;transition:.2s}
+.out-btn:hover{border-color:#f43f5e;color:#f43f5e}
+
+/* NAV TABS */
+.navtabs{display:flex;background:#0e0e1a;border-bottom:1px solid #2a2a3a;padding:0 20px;gap:4px;overflow-x:auto}
+.navtab{padding:12px 18px;cursor:pointer;font-size:13px;font-weight:600;color:#666;border-bottom:2px solid transparent;white-space:nowrap;transition:.2s}
+.navtab.on{color:#9d5df0;border-bottom-color:#7c3aed}
+
+/* CONTENT */
+.content{flex:1;padding:20px;max-width:860px;width:100%;margin:0 auto}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stat{background:#13131f;border:1px solid #2a2a3a;border-radius:14px;padding:14px;text-align:center}
+.stat-n{font-size:22px;font-weight:800;margin-bottom:3px}
+.stat-l{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:.8px}
+
+/* ADD FORM */
+.add-form{background:#13131f;border:1px solid #2a2a3a;border-radius:16px;padding:20px;margin-bottom:16px}
+.add-form h3{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:2px;margin-bottom:16px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.fg .full{grid-column:1/-1}
+.fl{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.fi{width:100%;background:#080810;border:1px solid #2a2a3a;color:#eee;padding:10px 12px;border-radius:9px;font-size:14px;outline:none;font-family:system-ui,sans-serif}
+.fi:focus{border-color:#7c3aed}
+.fi option{background:#13131f}
+.fa{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.costs{display:flex;gap:14px;flex-wrap:wrap}
+.ci{font-size:11px;color:#666}
+.ci b{color:#e2b714}
+.add-btn{background:#7c3aed;color:#fff;border:none;padding:10px 22px;border-radius:9px;cursor:pointer;font-size:14px;font-weight:700;font-family:system-ui,sans-serif;transition:.2s}
+.add-btn:hover{background:#9d5df0}
+
+/* FILTERS */
+.filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.search-box{position:relative;flex:1;min-width:160px}
+.search-box input{width:100%;background:#13131f;border:1px solid #2a2a3a;color:#eee;padding:9px 12px 9px 32px;border-radius:9px;font-size:13px;outline:none;font-family:system-ui,sans-serif}
+.search-box input:focus{border-color:#06b6d4}
+.search-box .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#666;pointer-events:none}
+.fb{background:transparent;border:1px solid #2a2a3a;color:#666;padding:8px 14px;border-radius:50px;cursor:pointer;font-size:12px;font-weight:600;font-family:system-ui,sans-serif;transition:.2s}
+.fb.on,.fb:hover{border-color:#7c3aed;color:#9d5df0;background:rgba(124,58,237,.08)}
+
+/* TASK CARDS */
+.tlist{display:flex;flex-direction:column;gap:8px}
+.empty{text-align:center;padding:48px 20px;color:#444}
+.empty .ico{font-size:40px;display:block;margin-bottom:12px}
+.empty p{font-size:13px}
+
+.tc{background:#13131f;border:1px solid #2a2a3a;border-radius:13px;padding:13px 15px;display:flex;align-items:flex-start;gap:12px;transition:.2s;position:relative;overflow:hidden}
+.tc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.tc.high::before{background:#f43f5e}
+.tc.medium::before{background:#fb923c}
+.tc.low::before{background:#34d399}
+.tc:hover{background:#1a1a28;border-color:#2e2e45}
+.tc.done{opacity:.45}
+.tc.done .tt{text-decoration:line-through;color:#555}
+.tc.overdue{border-color:rgba(244,63,94,.3)}
+
+.chk{width:20px;height:20px;border:2px solid #2a2a3a;border-radius:5px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.2s;font-size:12px;font-weight:800;color:transparent;margin-top:1px;background:transparent;min-width:20px}
+.chk:hover{border-color:#7c3aed}
+.chk.on{background:#7c3aed;border-color:#7c3aed;color:#fff}
+
+.tb{flex:1;min-width:0}
+.tt{font-size:14px;font-weight:600;margin-bottom:4px;line-height:1.4}
+.td{font-size:12px;color:#888;margin-bottom:5px;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dl{font-size:11px;color:#666}
+.dl.ov{color:#f43f5e}
+.dl.sn{color:#fb923c}
+.pt{font-size:10px;font-weight:700;padding:2px 7px;border-radius:50px;text-transform:uppercase;letter-spacing:.5px}
+.pt.high{background:rgba(244,63,94,.12);color:#f43f5e}
+.pt.medium{background:rgba(251,146,60,.12);color:#fb923c}
+.pt.low{background:rgba(52,211,153,.12);color:#34d399}
+.tl{font-size:11px;color:#06b6d4;background:rgba(6,182,212,.08);padding:2px 7px;border-radius:4px}
+
+.del-btn{width:28px;height:28px;border:1px solid #2a2a3a;background:transparent;color:#555;border-radius:7px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;min-width:28px}
+.del-btn:hover{border-color:#f43f5e;color:#f43f5e;background:rgba(244,63,94,.08)}
+
+/* CALENDAR */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.cal-nav h3{font-size:18px;font-weight:700}
+.cal-nav-btns{display:flex;gap:6px}
+.cal-nav-btns button{background:#13131f;border:1px solid #2a2a3a;color:#eee;width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.2s}
+.cal-nav-btns button:hover{border-color:#7c3aed;color:#9d5df0}
+.month-btns{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px}
+.mbtn{background:transparent;border:1px solid #2a2a3a;color:#666;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;font-family:system-ui,sans-serif;transition:.2s}
+.mbtn.on,.mbtn:hover{border-color:#7c3aed;color:#9d5df0}
+.cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
+.ch{text-align:center;font-size:11px;color:#555;padding:4px 0;text-transform:uppercase;letter-spacing:.5px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cd{background:#13131f;border:1px solid #2a2a3a;border-radius:9px;min-height:60px;padding:6px;cursor:pointer;transition:.2s;position:relative}
+.cd:hover{background:#1a1a28;border-color:#2e2e45}
+.cd.today{border-color:#7c3aed;background:rgba(124,58,237,.08)}
+.cd.today .cn{color:#9d5df0;font-weight:800}
+.cd.other{opacity:.25}
+.cd.sel{border-color:#06b6d4;background:rgba(6,182,212,.06)}
+.cn{font-size:12px;font-weight:600;color:#888;margin-bottom:4px}
+.cdots{display:flex;gap:2px;flex-wrap:wrap}
+.cdot{width:5px;height:5px;border-radius:50%}
+.cdot.high{background:#f43f5e}
+.cdot.medium{background:#fb923c}
+.cdot.low{background:#34d399}
+.day-panel{background:#13131f;border:1px solid #2a2a3a;border-radius:14px;padding:18px;margin-top:16px}
+.day-panel h4{font-size:14px;font-weight:700;margin-bottom:14px;color:#9d5df0}
+.dt{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#080810;border:1px solid #2a2a3a;border-radius:9px;margin-bottom:7px;border-left:3px solid transparent}
+.dt.high{border-left-color:#f43f5e}
+.dt.medium{border-left-color:#fb923c}
+.dt.low{border-left-color:#34d399}
+.dt-time{font-size:11px;color:#06b6d4;min-width:40px;font-weight:600}
+.dt-title{flex:1;font-size:13px;font-weight:500}
+.dt-title.done-t{text-decoration:line-through;color:#555}
+
+/* LEADERBOARD */
+.lb-item{display:flex;align-items:center;gap:12px;padding:12px 15px;background:#13131f;border:1px solid #2a2a3a;border-radius:12px;margin-bottom:8px}
+.lb-item.me{border-color:rgba(124,58,237,.4);background:rgba(124,58,237,.05)}
+.lb-rank{font-size:13px;color:#555;width:26px;text-align:center;flex-shrink:0}
+.lb-av{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0}
+.lb-name{flex:1;font-weight:600;font-size:14px}
+.lb-c{font-size:13px;color:#e2b714;font-weight:700}
+
+/* SETTINGS */
+.s-section{background:#13131f;border:1px solid #2a2a3a;border-radius:16px;padding:20px;margin-bottom:14px}
+.s-section h3{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
+.s-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #1a1a28}
+.s-row:last-child{border-bottom:none}
+.s-info .s-label{font-size:14px;font-weight:600;margin-bottom:3px}
+.s-info .s-desc{font-size:12px;color:#555}
+.toggle{width:42px;height:23px;background:#2a2a3a;border-radius:50px;cursor:pointer;position:relative;transition:.25s;border:none;flex-shrink:0}
+.toggle.on{background:#7c3aed}
+.toggle::after{content:'';position:absolute;width:17px;height:17px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.25s}
+.toggle.on::after{left:22px}
+.danger{background:rgba(244,63,94,.04);border:1px solid rgba(244,63,94,.2);border-radius:16px;padding:20px;margin-bottom:14px}
+.danger h3{font-size:11px;color:#f43f5e;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
+.dbtn{background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.3);color:#f43f5e;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:system-ui,sans-serif;transition:.2s}
+.dbtn:hover{background:rgba(244,63,94,.2)}
+.pw-edit{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.pw-edit input{flex:1;min-width:150px;background:#080810;border:1px solid #2a2a3a;color:#eee;padding:9px 12px;border-radius:8px;font-size:13px;outline:none;font-family:system-ui,sans-serif}
+.pw-edit input:focus{border-color:#7c3aed}
+.save-btn{background:#7c3aed;color:#fff;border:none;padding:9px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:system-ui,sans-serif;transition:.2s}
+.save-btn:hover{background:#9d5df0}
+
+/* TOAST */
+.toasts{position:fixed;bottom:20px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:7px;max-width:280px;pointer-events:none}
+.tst{background:#1a1a28;border:1px solid #2e2e45;padding:12px 14px;border-radius:11px;font-size:13px;line-height:1.4;animation:tin .25s ease;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+@keyframes tin{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+.tst.rw{border-color:rgba(52,211,153,.4);color:#34d399}
+.tst.pn{border-color:rgba(244,63,94,.4);color:#f43f5e}
+.tst.in{border-color:rgba(124,58,237,.4);color:#9d5df0}
+
+@media(max-width:600px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .fg{grid-template-columns:1fr}
+  .fg .full{grid-column:1}
+  .cd{min-height:44px}
+  .cn{font-size:10px}
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div class="auth" id="auth-page">
+  <div class="acard">
+    <h1>Task<span>Vault</span></h1>
+    <p>// productivity management system</p>
+    <div class="tabs">
+      <div class="tab on" id="tab-login" onclick="switchTab('login')">Kirish</div>
+      <div class="tab" id="tab-reg" onclick="switchTab('register')">Ro'yxatdan o'tish</div>
+    </div>
+    <div class="err" id="auth-err"></div>
+    <div class="hint" id="auth-hint" style="display:none">🪙 Ro'yxatdan o'tganda <b>100 tanga</b> sovg'a!</div>
+    <label class="lbl">Username</label>
+    <input class="inp" id="a-un" type="text" placeholder="masalan: diyorbek" autocomplete="username" oninput="this.value=this.value.toLowerCase().replace(/\s/g,'')"/>
+    <label class="lbl">Parol</label>
+    <input class="inp" id="a-pw" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuth()"/>
+    <button class="btn" id="auth-btn" onclick="doAuth()">Kirish →</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app-page">
+  <div class="topbar">
+    <h2>Task<span>Vault</span></h2>
+    <div class="topbar-right">
+      <div class="coin-pill" id="coin-disp">🪙 0</div>
+      <div class="streak-pill" id="streak-disp" style="display:none">🔥 0</div>
+      <button class="out-btn" onclick="logout()">Chiqish</button>
+    </div>
+  </div>
+  <div class="navtabs">
+    <div class="navtab on" onclick="goPage('tasks')">✅ Vazifalar</div>
+    <div class="navtab" onclick="goPage('calendar')">📅 Kalendar</div>
+    <div class="navtab" onclick="goPage('leaderboard')">🏆 Reyting</div>
+    <div class="navtab" onclick="goPage('settings')">⚙️ Sozlamalar</div>
+  </div>
+  <div class="content">
+    <div id="page-tasks"></div>
+    <div id="page-calendar" style="display:none"></div>
+    <div id="page-leaderboard" style="display:none"></div>
+    <div id="page-settings" style="display:none"></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+// ── Storage ───────────────────────────────────────────────────────────────────
+var S={
+  users:function(){try{return JSON.parse(localStorage.getItem('tv4_users')||'{}')}catch(e){return{}}},
+  su:function(u){localStorage.setItem('tv4_users',JSON.stringify(u))},
+  tasks:function(n){try{return JSON.parse(localStorage.getItem('tv4_t_'+n)||'[]')}catch(e){return[]}},
+  st:function(n,t){localStorage.setItem('tv4_t_'+n,JSON.stringify(t))},
+  sess:function(){try{return JSON.parse(localStorage.getItem('tv4_s')||'null')}catch(e){return null}},
+  ss:function(u){localStorage.setItem('tv4_s',JSON.stringify(u))},
+  cs:function(){localStorage.removeItem('tv4_s')},
+  cfg:function(){try{return JSON.parse(localStorage.getItem('tv4_cfg')||'{"notif":true,"sounds":false}')}catch(e){return{notif:true,sounds:false}}},
+  sc:function(c){localStorage.setItem('tv4_cfg',JSON.stringify(c))}
+};
+
+// ── State ─────────────────────────────────────────────────────────────────────
+var user=null,tasks=[],curPage='tasks',filter='all',search='',calYear=2026,calMonth=new Date().getMonth(),selDay=null;
+var cfg=S.cfg();
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function toast(msg,type){
+  var el=document.createElement('div');
+  el.className='tst '+(type||'in');
+  el.textContent=msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(function(){el.remove()},3500);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function tod(){return new Date().toISOString().split('T')[0]}
+function saveUser(u){var us=S.users();us[u.username]=u;S.su(us);S.ss(u);user=u}
+function saveTasks(t){S.st(user.username,t);tasks=t}
+
+function timeLeft(ms){
+  var d=ms-Date.now();
+  if(d<=0)return null;
+  var h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000);
+  if(h>=24)return Math.floor(h/24)+'k '+h%24+'s';
+  if(h>0)return h+'s '+m+'d';
+  return m+' daqiqa';
+}
+
+function dlInfo(ms,done){
+  if(!ms||done)return{cls:'',txt:''};
+  var diff=ms-Date.now(),h=diff/3600000;
+  var dt=new Date(ms);
+  var s=dt.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+' '+dt.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  if(diff<0)return{cls:'ov',txt:'⚠ Muddati o\'tdi!'};
+  if(h<3)return{cls:'sn',txt:'🔥 '+timeLeft(ms)+' qoldi'};
+  if(h<24)return{cls:'sn',txt:'⏰ '+s};
+  return{cls:'',txt:'📅 '+s};
+}
+
+function getLB(){
+  return Object.values(S.users()).sort(function(a,b){return b.coins-a.coins}).slice(0,10);
+}
+
+function updateTopbar(){
+  if(!user)return;
+  document.getElementById('coin-disp').textContent='🪙 '+user.coins;
+  var s=document.getElementById('streak-disp');
+  if(user.streak>0){s.textContent='🔥 '+user.streak;s.style.display=''}
+  else s.style.display='none';
+}
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+var authTab='login';
+function switchTab(t){
+  authTab=t;
+  document.getElementById('tab-login').className='tab'+(t==='login'?' on':'');
+  document.getElementById('tab-reg').className='tab'+(t==='register'?' on':'');
+  document.getElementById('auth-hint').style.display=t==='register'?'':'none';
+  document.getElementById('auth-btn').textContent=t==='login'?'Kirish →':'Ro\'yxatdan o\'tish →';
+  document.getElementById('auth-err').style.display='none';
+}
+
+function doAuth(){
+  var un=document.getElementById('a-un').value.trim().toLowerCase().replace(/\s/g,'');
+  var pw=document.getElementById('a-pw').value;
+  var err=document.getElementById('auth-err');
+  err.style.display='none';
+  if(!un||!pw){err.textContent='⚠ Barcha maydonlarni to\'ldiring!';err.style.display='block';return}
+  if(un.length<3){err.textContent='⚠ Username kamida 3 ta harf bo\'lsin!';err.style.display='block';return}
+  if(pw.length<4){err.textContent='⚠ Parol kamida 4 ta belgi bo\'lsin!';err.style.display='block';return}
+  var users=S.users();
+  if(authTab==='register'){
+    if(users[un]){err.textContent='⚠ Bu username band! Boshqa tanlang.';err.style.display='block';return}
+    var u={username:un,password:pw,coins:100,streak:0,total:0,joined:Date.now()};
+    users[un]=u;S.su(users);S.ss(u);user=u;tasks=[];
+    toast('Xush kelibsiz, '+un+'! 🎉 100 tanga berildi!','rw');
+  } else {
+    var u=users[un];
+    if(!u||u.password!==pw){err.textContent='⚠ Username yoki parol noto\'g\'ri!';err.style.display='block';return}
+    S.ss(u);user=u;tasks=S.tasks(un);
+    toast('Xush kelibsiz, '+un+'! 🎯','rw');
+  }
+  document.getElementById('auth-page').style.display='none';
+  document.getElementById('app-page').style.display='flex';
+  updateTopbar();
+  goPage('tasks');
+}
+
+function logout(){
+  S.cs();user=null;tasks=[];filter='all';search='';curPage='tasks';
+  document.getElementById('app-page').style.display='none';
+  document.getElementById('auth-page').style.display='flex';
+  document.getElementById('a-un').value='';
+  document.getElementById('a-pw').value='';
+  document.getElementById('auth-err').style.display='none';
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+function goPage(p){
+  curPage=p;
+  ['tasks','calendar','leaderboard','settings'].forEach(function(n){
+    document.getElementById('page-'+n).style.display=n===p?'':'none';
+  });
+  document.querySelectorAll('.navtab').forEach(function(el,i){
+    var pages=['tasks','calendar','leaderboard','settings'];
+    el.className='navtab'+(pages[i]===p?' on':'');
+  });
+  if(p==='tasks')renderTasks();
+  else if(p==='calendar')renderCalendar();
+  else if(p==='leaderboard')renderLeaderboard();
+  else if(p==='settings')renderSettings();
+}
+
+// ── TASKS ─────────────────────────────────────────────────────────────────────
+function renderTasks(){
+  var done=tasks.filter(function(t){return t.completed}).length;
+  var over=tasks.filter(function(t){return!t.completed&&t.dm&&t.dm<Date.now()}).length;
+  var active=tasks.length-done;
+
+  var filt=tasks.filter(function(t){
+    var fm=filter==='all'
+      ||(filter==='active'&&!t.completed)
+      ||(filter==='done'&&t.completed)
+      ||(filter==='today'&&t.dm&&new Date(t.dm).toISOString().split('T')[0]===tod())
+      ||(filter==='overdue'&&!t.completed&&t.dm&&t.dm<Date.now());
+    return fm&&t.title.toLowerCase().indexOf(search.toLowerCase())>=0;
+  });
+
+  var minDt=new Date(Date.now()+3600000).toISOString().slice(0,16);
+
+  var html='<div class="stats">'
+    +'<div class="stat"><div class="stat-n" style="color:#9d5df0">'+user.coins+'</div><div class="stat-l">🪙 Tangalar</div></div>'
+    +'<div class="stat"><div class="stat-n" style="color:#34d399">'+done+'</div><div class="stat-l">✅ Bajarilgan</div></div>'
+    +'<div class="stat"><div class="stat-n" style="color:#fb923c">'+active+'</div><div class="stat-l">⏳ Aktiv</div></div>'
+    +'<div class="stat"><div class="stat-n" style="color:#f43f5e">'+over+'</div><div class="stat-l">⚠ Muddati o\'tgan</div></div>'
+    +'</div>'
+
+    +'<div class="add-form">'
+    +'<h3>// yangi vazifa qo\'shish</h3>'
+    +'<div class="fg">'
+    +'<div class="full"><div class="fl">Vazifa nomi *</div><input class="fi" id="n-t" type="text" placeholder="Nima qilish kerak?" onkeydown="if(event.key===\'Enter\')addTask()"/></div>'
+    +'<div class="full"><div class="fl">Tavsif (ixtiyoriy)</div><input class="fi" id="n-d" type="text" placeholder="Qo\'shimcha izoh..."/></div>'
+    +'<div><div class="fl">Deadline (min 1 soat keyin) *</div><input class="fi" id="n-dl" type="datetime-local" min="'+minDt+'"/></div>'
+    +'<div><div class="fl">Muhimlik</div><select class="fi" id="n-p"><option value="high">🔴 Yuqori</option><option value="medium" selected>🟠 O\'rta</option><option value="low">🟢 Past</option></select></div>'
+    +'</div>'
+    +'<div class="fa">'
+    +'<div class="costs"><span class="ci">Qo\'shish: <b>-5🪙</b></span><span class="ci">Vaqtida: <b>+20🪙</b></span><span class="ci">Kechikish: <b>-10🪙</b></span></div>'
+    +'<button class="add-btn" onclick="addTask()">+ Qo\'shish</button>'
+    +'</div></div>'
+
+    +'<div class="filters">'
+    +'<div class="search-box"><span class="si">🔍</span><input type="text" placeholder="Qidirish..." value="'+esc(search)+'" oninput="search=this.value;renderTasks()"/></div>'
+    +'<button class="fb'+(filter==='all'?' on':'')+'" onclick="filter=\'all\';renderTasks()">Barchasi</button>'
+    +'<button class="fb'+(filter==='active'?' on':'')+'" onclick="filter=\'active\';renderTasks()">Aktiv</button>'
+    +'<button class="fb'+(filter==='today'?' on':'')+'" onclick="filter=\'today\';renderTasks()">Bugun</button>'
+    +'<button class="fb'+(filter==='done'?' on':'')+'" onclick="filter=\'done\';renderTasks()">Bajarilgan</button>'
+    +'<button class="fb'+(filter==='overdue'?' on':'')+'" onclick="filter=\'overdue\';renderTasks()">Muddati o\'tgan</button>'
+    +'</div>';
+
+  if(filt.length===0){
+    html+='<div class="empty"><span class="ico">'+(search?'🔍':'📭')+'</span><p>'+(search?'Hech narsa topilmadi':'Vazifalar yo\'q. Yangi qo\'shing!')+'</p></div>';
+  } else {
+    html+='<div class="tlist">';
+    filt.forEach(function(t){
+      var dl=dlInfo(t.dm,t.completed);
+      var tl=t.dm&&!t.completed?timeLeft(t.dm):null;
+      var ov=t.dm&&!t.completed&&t.dm<Date.now();
+      html+='<div class="tc '+t.p+(t.completed?' done':'')+(ov?' overdue':'')+'">'
+        +'<div class="chk'+(t.completed?' on':'')+'" onclick="toggleTask('+t.id+')">'+(t.completed?'✓':'')+'</div>'
+        +'<div class="tb">'
+        +'<div class="tt">'+esc(t.title)+'</div>'
+        +(t.desc?'<div class="td">'+esc(t.desc)+'</div>':'')
+        +'<div class="tm">'
+        +(t.dm?'<span class="dl '+dl.cls+'">'+dl.txt+'</span>':'<span class="dl">📋 Deadline yo\'q</span>')
+        +'<span class="pt '+t.p+'">'+(t.p==='high'?'Yuqori':t.p==='medium'?'O\'rta':'Past')+'</span>'
+        +(tl&&!ov?'<span class="tl">'+tl+' qoldi</span>':'')
+        +'</div></div>'
+        +'<button class="del-btn" onclick="deleteTask('+t.id+')">🗑</button>'
+        +'</div>';
+    });
+    html+='</div>';
+  }
+
+  document.getElementById('page-tasks').innerHTML=html;
+}
+
+function addTask(){
+  var title=document.getElementById('n-t').value.trim();
+  var desc=document.getElementById('n-d').value.trim();
+  var dlVal=document.getElementById('n-dl').value;
+  var priority=document.getElementById('n-p').value;
+  if(!title){toast('Vazifa nomini kiriting!','pn');return}
+  var dm=null;
+  if(dlVal){
+    var dlTime=new Date(dlVal).getTime();
+    if(dlTime<Date.now()+3600000){toast('Deadline kamida 1 soatdan keyin bo\'lsin!','pn');return}
+    dm=dlTime;
+  }
+  if(user.coins<5){toast('Tangalar yetarli emas! (5🪙 kerak)','pn');return}
+  var task={id:Date.now(),title:title,desc:desc,p:priority,dm:dm,completed:false,created:Date.now()};
+  saveTasks([task].concat(tasks));
+  saveUser(Object.assign({},user,{coins:user.coins-5}));
+  updateTopbar();
+  toast('Vazifa qo\'shildi! -5🪙','pn');
+  renderTasks();
+}
+
+function toggleTask(id){
+  var t=tasks.find(function(x){return x.id===id});
+  if(!t)return;
+  var done=t.completed,dc=0,msg='',ns=user.streak;
+  if(!done){
+    if(t.dm&&Date.now()>t.dm){dc=-10;msg='⏰ Deadline o\'tgan edi! -10🪙';ns=0}
+    else{dc=t.dm?20:10;msg=t.dm?'⚡ Vaqtida! +20🪙':'✅ Bajarildi! +10🪙';ns=user.streak+1}
+  } else {dc=-5;msg='🔄 Qayta ochildi. -5🪙';ns=0}
+  saveTasks(tasks.map(function(x){return x.id===id?Object.assign({},x,{completed:!done}):x}));
+  saveUser(Object.assign({},user,{coins:Math.max(0,user.coins+dc),streak:ns,total:user.total+(!done?1:-1)}));
+  updateTopbar();
+  toast(msg,dc>0?'rw':'pn');
+  renderTasks();
+}
+
+function deleteTask(id){
+  var t=tasks.find(function(x){return x.id===id});
+  if(!t)return;
+  saveTasks(tasks.filter(function(x){return x.id!==id}));
+  if(!t.completed){saveUser(Object.assign({},user,{coins:Math.max(0,user.coins-3)}));updateTopbar();toast('O\'chirildi. -3🪙','pn')}
+  else toast('O\'chirildi','in');
+  renderTasks();
+}
+
+// ── CALENDAR ──────────────────────────────────────────────────────────────────
+var MONTHS=['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'];
+var DAYS=['Du','Se','Ch','Pa','Ju','Sh','Ya'];
+
+function renderCalendar(){
+  var y=calYear,m=calMonth;
+  var first=new Date(y,m,1).getDay();
+  var off=(first+6)%7;
+  var dim=new Date(y,m+1,0).getDate();
+  var prev=new Date(y,m,0).getDate();
+  var todStr=tod();
+
+  var tmap={};
+  tasks.forEach(function(t){
+    if(!t.dm)return;
+    var d=new Date(t.dm).toISOString().split('T')[0];
+    if(!tmap[d])tmap[d]=[];
+    tmap[d].push(t);
+  });
+
+  var html='<div class="cal-nav">'
+    +'<h3>'+MONTHS[m]+' '+y+'</h3>'
+    +'<div class="cal-nav-btns">'
+    +'<button onclick="calPrev()">‹</button>'
+    +'<button onclick="calToday()">Bugun</button>'
+    +'<button onclick="calNext()">›</button>'
+    +'</div></div>'
+    +'<div class="month-btns">';
+  MONTHS.forEach(function(mn,i){html+='<button class="mbtn'+(calMonth===i?' on':'')+'" onclick="calMonth='+i+';renderCalendar()">'+mn.slice(0,3)+'</button>';});
+  html+='</div>';
+
+  html+='<div class="cal-head">';
+  DAYS.forEach(function(d){html+='<div class="ch">'+d+'</div>';});
+  html+='</div><div class="cal-grid">';
+
+  for(var i=off-1;i>=0;i--){html+='<div class="cd other"><div class="cn">'+(prev-i)+'</div></div>';}
+  for(var d=1;d<=dim;d++){
+    var ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var isTod=ds===todStr,isSel=selDay===ds,dt=tmap[ds]||[];
+    html+='<div class="cd'+(isTod?' today':'')+(isSel?' sel':'')+(dt.length?' has-t':'')+'" onclick="selDay=selDay===\''+ds+'\'?null:\''+ds+'\';renderCalendar()">'
+      +'<div class="cn">'+d+'</div>'
+      +'<div class="cdots">'+dt.slice(0,4).map(function(t){return'<div class="cdot '+t.p+'"></div>';}).join('')+'</div>'
+      +'</div>';
+  }
+  var tot=off+dim,rem=tot%7===0?0:7-tot%7;
+  for(var i=1;i<=rem;i++){html+='<div class="cd other"><div class="cn">'+i+'</div></div>';}
+  html+='</div>';
+
+  if(selDay){
+    var st=tmap[selDay]||[];
+    var sd=new Date(selDay);
+    var dlbl=sd.toLocaleDateString('uz-UZ',{weekday:'long',month:'long',day:'numeric'});
+    html+='<div class="day-panel"><h4>📅 '+esc(dlbl)+'</h4>';
+    if(st.length===0){html+='<p style="color:#444;font-size:13px;text-align:center;padding:10px">Bu kunda vazifalar yo\'q</p>';}
+    else st.forEach(function(t){
+      var time=t.dm?new Date(t.dm).toLocaleTimeString('uz-UZ',{hour:'2-digit',minute:'2-digit'}):'--:--';
+      html+='<div class="dt '+t.p+(t.completed?' done-t':'')+'">'
+        +'<div class="dt-time">'+time+'</div>'
+        +'<div class="dt-title'+(t.completed?' done-t':'')+'">'+esc(t.title)+'</div>'
+        +'<span class="pt '+t.p+'" style="font-size:10px">'+(t.p==='high'?'Yuqori':t.p==='medium'?'O\'rta':'Past')+'</span>'
+        +'</div>';
+    });
+    html+='</div>';
+  }
+
+  document.getElementById('page-calendar').innerHTML=html;
+}
+function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
+function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();}
+function calToday(){calYear=new Date().getFullYear();calMonth=new Date().getMonth();renderCalendar();}
+
+// ── LEADERBOARD ───────────────────────────────────────────────────────────────
+function renderLeaderboard(){
+  var lb=getLB();
+  var medals=['🥇','🥈','🥉'];
+  var html='<h2 style="font-size:20px;font-weight:800;margin-bottom:6px">🏆 Reyting</h2>'
+    +'<p style="color:#555;font-size:12px;margin-bottom:20px">// eng faol foydalanuvchilar</p>';
+  if(lb.length===0){html+='<div class="empty"><span class="ico">🏆</span><p>Hali foydalanuvchilar yo\'q</p></div>';}
+  else lb.forEach(function(u,i){
+    html+='<div class="lb-item'+(u.username===user.username?' me':'')+'">'
+      +'<div class="lb-rank">'+(medals[i]||i+1)+'</div>'
+      +'<div class="lb-av">'+esc(u.username[0].toUpperCase())+'</div>'
+      +'<div class="lb-name">'+esc(u.username)+(u.username===user.username?' <span style="color:#9d5df0;font-size:11px">(siz)</span>':'')+'</div>'
+      +'<div class="lb-c">🪙 '+u.coins+(u.streak>0?'<div style="font-size:11px;color:#fb923c">🔥 '+u.streak+'</div>':'')+'</div>'
+      +'</div>';
+  });
+  document.getElementById('page-leaderboard').innerHTML=html;
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────────────────────
+function renderSettings(){
+  var over=tasks.filter(function(t){return!t.completed&&t.dm&&t.dm<Date.now()}).length;
+  var html='<h2 style="font-size:20px;font-weight:800;margin-bottom:6px">⚙️ Sozlamalar</h2>'
+    +'<p style="color:#555;font-size:12px;margin-bottom:20px">// hisob va ilova sozlamalari</p>'
+
+    +'<div class="s-section"><h3>👤 Profil</h3>'
+    +'<div class="s-row"><div class="s-info"><div class="s-label">Username</div><div class="s-desc">'+esc(user.username)+'</div></div></div>'
+    +'<div class="s-row"><div class="s-info"><div class="s-label">Parolni o\'zgartirish</div></div></div>'
+    +'<div class="pw-edit"><input type="password" id="new-pw" placeholder="Yangi parol (4+ belgi)"/><button class="save-btn" onclick="savePw()">Saqlash</button></div>'
+    +'</div>'
+
+    +'<div class="s-section"><h3>🎮 Statistika</h3>'
+    +'<div class="s-row"><div class="s-info"><div class="s-label">Tangalar</div></div><span style="color:#e2b714;font-weight:700;font-size:16px">🪙 '+user.coins+'</span></div>'
+    +'<div class="s-row"><div class="s-info"><div class="s-label">Streak</div></div><span style="color:#fb923c;font-weight:700;font-size:16px">🔥 '+user.streak+'</span></div>'
+    +'<div class="s-row"><div class="s-info"><div class="s-label">Jami bajarilgan</div></div><span style="color:#34d399;font-weight:700;font-size:16px">✅ '+user.total+'</span></div>'
+    +'<div class="s-row"><div class="s-info"><div class="s-label">Jami vazifalar</div></div><span style="color:#888;font-size:15px">'+tasks.length+'</span></div>'
+    +'<div class="s-row"><div class="s-info"><div class="s-label">Muddati o\'tgan</div></div><span style="color:#f43f5e;font-size:15px">'+over+'</span></div>'
+    +'</div>'
+
+    +'<div class="s-section"><h3>🔔 Bildirishnomalar</h3>'
+    +'<div class="s-row"><div class="s-info"><div class="s-label">Deadline eslatmalari</div><div class="s-desc">Vaqt yaqinlashganda xabar</div></div>'
+    +'<button class="toggle'+(cfg.notif?' on':'')+'" onclick="togCfg(\'notif\')"></button></div>'
+    +'<div class="s-row"><div class="s-info"><div class="s-label">Ovozli signal</div><div class="s-desc">Tanga topganda ovoz</div></div>'
+    +'<button class="toggle'+(cfg.sounds?' on':'')+'" onclick="togCfg(\'sounds\')"></button></div>'
+    +'</div>'
+
+    +'<div class="danger"><h3>⚠ Xavfli zona</h3>'
+    +'<div class="s-row"><div class="s-info"><div class="s-label">Barcha vazifalarni o\'chirish</div><div class="s-desc">Bu amalni qaytarib bo\'lmaydi</div></div>'
+    +'<button class="dbtn" onclick="clearTasks()">Tozalash</button></div>'
+    +'<div class="s-row" style="border-bottom:none"><div class="s-info"><div class="s-label">Hisobni o\'chirish</div><div class="s-desc">Hamma ma\'lumot o\'chadi</div></div>'
+    +'<button class="dbtn" onclick="deleteAcc()">O\'chirish</button></div>'
+    +'</div>';
+
+  document.getElementById('page-settings').innerHTML=html;
+}
+function togCfg(k){cfg[k]=!cfg[k];S.sc(cfg);renderSettings();}
+function savePw(){
+  var pw=document.getElementById('new-pw').value;
+  if(pw.length<4){toast('Parol kamida 4 ta belgi bo\'lsin!','pn');return}
+  saveUser(Object.assign({},user,{password:pw}));
+  toast('Parol o\'zgartirildi! ✅','rw');
+}
+function clearTasks(){
+  if(confirm('Barcha vazifalarni o\'chirasizmi?')){saveTasks([]);toast('Tozalandi','pn');renderTasks();}
+}
+function deleteAcc(){
+  if(confirm('Hisobni o\'chirasizmi? Bu amalni qaytarib bo\'lmaydi!')){
+    var us=S.users();delete us[user.username];S.su(us);
+    localStorage.removeItem('tv4_t_'+user.username);S.cs();
+    user=null;tasks=[];
+    document.getElementById('app-page').style.display='none';
+    document.getElementById('auth-page').style.display='flex';
+    toast('Hisob o\'chirildi','pn');
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+(function(){
+  var sess=S.sess();
+  if(sess){
+    var fresh=S.users()[sess.username];
+    user=fresh||sess;tasks=S.tasks(user.username);
+    document.getElementById('auth-page').style.display='none';
+    document.getElementById('app-page').style.display='flex';
+    updateTopbar();goPage('tasks');
+  }
+  setInterval(function(){if(user&&curPage==='tasks')renderTasks();},60000);
+})();
+
+// ── PWA ───────────────────────────────────────────────────────────────────────
+if('serviceWorker'in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});
+</script>
+</body>
+</html>
