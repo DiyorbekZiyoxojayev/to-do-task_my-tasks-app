@@ -1330,7 +1330,19 @@ function deleteAcc(){
 })();
 
 // ── PWA ───────────────────────────────────────────────────────────────────
-if('serviceWorker'in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});
+if('serviceWorker'in navigator){
+  window.addEventListener('load',function(){
+    var swUrl='sw.js';
+    // GitHub Pages uchun to'g'ri path
+    if(location.pathname.indexOf('/to-do-task_my-tasks-app/')===0){
+      swUrl='/to-do-task_my-tasks-app/sw.js';
+    }
+    navigator.serviceWorker.register(swUrl).then(function(reg){
+      // Har doim yangi versiyani olish
+      reg.update();
+    }).catch(function(){});
+  });
+}
 var _dp=null;
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();_dp=e;document.getElementById('pwa-b').style.display='flex';});
 document.getElementById('pwa-yes').onclick=function(){if(!_dp)return;_dp.prompt();_dp.userChoice.then(function(){_dp=null;document.getElementById('pwa-b').style.display='none';});};
