@@ -1,25 +1,28 @@
-// TaskVault Pro - Service Worker
-// Muhim: App o'rnatilganda to'g'ri ishlashi uchun network-first strategiya
-
-const CACHE = "taskvault-pro-v2";
+const CACHE = "taskvault-pro-v3";
+const BASE = "/to-do-task_my-tasks-app";
 
 self.addEventListener("install", e => {
-  // Darhol faollashadi
-  self.skipWaiting();
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll([
+      BASE + "/",
+      BASE + "/index.html",
+      BASE + "/manifest.json",
+      BASE + "/icon-192.png",
+      BASE + "/icon-512.png"
+    ])).then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", e => {
-  // Barcha eski keshlarni o'chirib tashlaydi
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener("fetch", e => {
-  // HTML fayllar uchun: DOIM tarmoqdan ol, keyin keshla
-  if (e.request.mode === "navigate" || e.request.url.endsWith(".html")) {
+  if (e.request.mode === "navigate") {
     e.respondWith(
       fetch(e.request)
         .then(res => {
@@ -27,21 +30,15 @@ self.addEventListener("fetch", e => {
           caches.open(CACHE).then(c => c.put(e.request, clone));
           return res;
         })
-        .catch(() => caches.match(e.request))
+        .catch(() => caches.match(BASE + "/index.html"))
     );
     return;
   }
-
-  // Boshqa fayllar: keshdan ol, yo'q bo'lsa tarmoqdan
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        if (!res || res.status !== 200 || res.type === "opaque") return res;
-        const clone = res.clone();
-        caches.open(CACHE).then(c => c.put(e.request, clone));
-        return res;
-      });
-    })
+    caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
+      if (!res || res.status !== 200 || res.type === "opaque") return res;
+      caches.open(CACHE).then(c => c.put(e.request, res.clone()));
+      return res;
+    }))
   );
 });
